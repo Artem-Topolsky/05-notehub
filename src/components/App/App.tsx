@@ -10,6 +10,7 @@ import { fetchNotes, createNote } from "../../services/noteService";
 import type { Note, NotesResponse } from "../../types/note";
 import NoteList from "../NoteList/NoteList";
 import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import Pagination from "../Pagination/Pagination";
 import Modal from "../Modal/Modal";
 import SearchBox from "../SearchBox/SearchBox";
@@ -20,13 +21,14 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 500);
   const perPage = 9;
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, isFetching } = useQuery<NotesResponse>({
-    queryKey: ["notes", currentPage, perPage, search],
+    queryKey: ["notes", currentPage, perPage, debouncedSearch],
     queryFn: async () => {
-      const result = await fetchNotes(currentPage, perPage, search);
+      const result = await fetchNotes(currentPage, perPage, debouncedSearch);
       await new Promise((resolve) => setTimeout(resolve, 300));
       return result;
     },
