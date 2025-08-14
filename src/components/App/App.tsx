@@ -1,5 +1,5 @@
 import css from "./App.module.css";
-import { Toaster } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import {
   useQuery,
   useMutation,
@@ -20,12 +20,16 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
-  const perPage = 8;
+  const perPage = 9;
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, isFetching } = useQuery<NotesResponse>({
     queryKey: ["notes", currentPage, perPage, search],
-    queryFn: () => fetchNotes(currentPage, perPage, search),
+    queryFn: async () => {
+      const result = await fetchNotes(currentPage, perPage, search);
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      return result;
+    },
     placeholderData: keepPreviousData,
   });
 
@@ -34,6 +38,10 @@ export default function App() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setIsModalOpen(false);
+      toast.success("Note created ✅");
+    },
+    onError: () => {
+      toast.error("Failed to create note ❌");
     },
   });
 

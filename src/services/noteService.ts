@@ -36,7 +36,6 @@ export const deleteNote = async (noteId: NoteId) => {
   await axios.delete(`/notes/${noteId}`);
 };
 
-// Оновити нотатку
 export const updateNote = async (
   noteId: NoteId,
   updatedFields: Partial<Note>

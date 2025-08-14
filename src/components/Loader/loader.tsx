@@ -1,10 +1,10 @@
 import css from "./loader.module.css";
-import { ClipLoader } from "react-spinners";
+import { PacmanLoader } from "react-spinners";
 
 export default function Loader() {
   return (
     <div className={css.wrapper}>
-      <ClipLoader color="#ff5e00ff" size={40} />
+      <PacmanLoader color="#ff9800" size={25} />
     </div>
   );
 }

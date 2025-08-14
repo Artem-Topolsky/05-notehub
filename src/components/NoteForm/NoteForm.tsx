@@ -1,7 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import css from "./NoteForm.module.css";
-import type { Tag } from "../../types/note"; // Використовуємо готовий Tag з типів
+import type { Tag } from "../../types/note";
 
 export interface NoteFormValues {
   title: string;

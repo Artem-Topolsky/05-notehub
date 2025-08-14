@@ -2,9 +2,9 @@ import ReactPaginate from "react-paginate";
 import css from "./Pagination.module.css";
 
 interface PaginationProps {
-  pageCount: number; // Загальна кількість сторінок
-  currentPage: number; // Поточна активна сторінка (починається з 1)
-  onPageChange: (page: number) => void; // Колбек при зміні сторінки
+  pageCount: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
 export default function Pagination({
