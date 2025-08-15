@@ -1,18 +1,20 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage as FormikError } from "formik";
 import * as Yup from "yup";
 import css from "./NoteForm.module.css";
-import type { Tag } from "../../types/note";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../services/noteService";
+import { toast } from "react-hot-toast";
+import type { Tag, Note } from "../../types/note";
 
-export interface NoteFormValues {
-  title: string;
-  content: string;
-  tag: Tag;
-}
+export type NoteFormValues = Omit<Note, "id" | "createdAt" | "updatedAt">;
 
 interface NoteFormProps {
-  initialValues?: NoteFormValues;
-  onSubmit: (values: NoteFormValues) => void;
   onCancel?: () => void;
+  onSubmit: (newNoteData: {
+    title: string;
+    content: string;
+    tag: Note["tag"];
+  }) => void;
 }
 
 const validationSchema = Yup.object({
@@ -28,17 +30,27 @@ const validationSchema = Yup.object({
     .required("Tag is required"),
 });
 
-export default function NoteForm({
-  initialValues = { title: "", content: "", tag: "Todo" },
-  onSubmit,
-  onCancel,
-}: NoteFormProps) {
+export default function NoteForm({ onCancel }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note created ✅");
+      onCancel?.();
+    },
+    onError: () => {
+      toast.error("Failed to create note ❌");
+    },
+  });
+
   return (
-    <Formik
-      initialValues={initialValues}
+    <Formik<NoteFormValues>
+      initialValues={{ title: "", content: "", tag: "Todo" }}
       validationSchema={validationSchema}
       onSubmit={(values, { setSubmitting }) => {
-        onSubmit(values);
+        mutate(values);
         setSubmitting(false);
       }}
     >
@@ -47,7 +59,7 @@ export default function NoteForm({
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
             <Field id="title" name="title" type="text" className={css.input} />
-            <ErrorMessage name="title" component="span" className={css.error} />
+            <FormikError name="title" component="span" className={css.error} />
           </div>
 
           <div className={css.formGroup}>
@@ -59,7 +71,7 @@ export default function NoteForm({
               rows={8}
               className={css.textarea}
             />
-            <ErrorMessage
+            <FormikError
               name="content"
               component="span"
               className={css.error}
@@ -75,7 +87,7 @@ export default function NoteForm({
               <option value="Meeting">Meeting</option>
               <option value="Shopping">Shopping</option>
             </Field>
-            <ErrorMessage name="tag" component="span" className={css.error} />
+            <FormikError name="tag" component="span" className={css.error} />
           </div>
 
           <div className={css.actions}>
@@ -89,9 +101,9 @@ export default function NoteForm({
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
             >
-              Create note
+              {isPending ? "Creating..." : "Create note"}
             </button>
           </div>
         </Form>

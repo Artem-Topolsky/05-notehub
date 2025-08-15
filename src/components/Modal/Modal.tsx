@@ -1,16 +1,15 @@
-import css from "./Modal.module.css";
 import { createPortal } from "react-dom";
+import css from "./Modal.module.css";
 import { useEffect } from "react";
-import NoteForm from "../NoteForm/NoteForm";
-import type { NoteFormValues } from "../NoteForm/NoteForm";
-interface NoteModalProps {
+
+interface ModalProps {
+  children: React.ReactNode;
   onClose: () => void;
-  onSubmit: (values: NoteFormValues) => void;
 }
 
-export default function NoteModal({ onClose, onSubmit }: NoteModalProps) {
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
+export default function Modal({ children, onClose }: ModalProps) {
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
       onClose();
     }
   };
@@ -21,13 +20,12 @@ export default function NoteModal({ onClose, onSubmit }: NoteModalProps) {
         onClose();
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
 
@@ -36,11 +34,9 @@ export default function NoteModal({ onClose, onSubmit }: NoteModalProps) {
       className={css.backdrop}
       role="dialog"
       aria-modal="true"
-      onClick={handleBackdropClick}
+      onClick={handleBackdrop}
     >
-      <div className={css.modal}>
-        <NoteForm onSubmit={onSubmit} onCancel={onClose} />
-      </div>
+      <div className={css.modal}>{children}</div>
     </div>,
     document.body
   );

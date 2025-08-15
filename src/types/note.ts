@@ -2,15 +2,11 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  createdAt: string;
+   createdAt: string;
   updatedAt: string;
-  tag: "Work" | "Personal" | "Meeting" | "Shopping" | "Todo";
+  tag: Tag;
 }
 
 export type NoteId = Note["id"];
-export type Tag = Note["tag"];
 
-export interface NotesResponse {
-  notes: Note[];
-  totalPages: number;
-}
+export type Tag = "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";

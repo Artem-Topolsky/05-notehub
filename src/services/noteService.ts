@@ -1,15 +1,12 @@
 import axios from "axios";
-import type { Note, NoteId } from "../types/note";
-
-axios.defaults.baseURL = "https://notehub-public.goit.study/api";
-axios.defaults.headers.common["Authorization"] = `Bearer ${
-  import.meta.env.VITE_NOTEHUB_TOKEN
-}`;
-
+import type { Note, NoteId,} from "../types/note";
 export interface NotesResponse {
   notes: Note[];
   totalPages: number;
 }
+
+axios.defaults.baseURL = "https://notehub-public.goit.study/api";
+axios.defaults.headers.common["Authorization"] = `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`;
 
 export const fetchNotes = async (
   page: number,
@@ -18,12 +15,10 @@ export const fetchNotes = async (
 ): Promise<NotesResponse> => {
   const params: Record<string, string | number> = { page, perPage };
   if (search) params.search = search;
-
   const { data } = await axios.get<NotesResponse>("/notes", { params });
   return data;
 };
 
-// Створити нотатку
 export const createNote = async (
   newNote: Omit<Note, "id" | "createdAt" | "updatedAt">
 ) => {
@@ -31,15 +26,7 @@ export const createNote = async (
   return data;
 };
 
-// Видалити нотатку
 export const deleteNote = async (noteId: NoteId) => {
-  await axios.delete(`/notes/${noteId}`);
-};
-
-export const updateNote = async (
-  noteId: NoteId,
-  updatedFields: Partial<Note>
-) => {
-  const { data } = await axios.patch<Note>(`/notes/${noteId}`, updatedFields);
+  const { data } = await axios.delete<Note>(`/notes/${noteId}`);
   return data;
 };

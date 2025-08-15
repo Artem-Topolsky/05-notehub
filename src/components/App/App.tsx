@@ -7,7 +7,7 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { fetchNotes, createNote } from "../../services/noteService";
-import type { Note, NotesResponse } from "../../types/note";
+import type { Note } from "../../types/note";
 import NoteList from "../NoteList/NoteList";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -16,6 +16,8 @@ import Modal from "../Modal/Modal";
 import SearchBox from "../SearchBox/SearchBox";
 import Loader from "../Loader/loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import NoteForm from "../NoteForm/NoteForm";
+import type { NotesResponse } from "../../services/noteService";
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -107,7 +109,12 @@ export default function App() {
         {data && !isLoading && <NoteList notes={data.notes ?? []} />}
 
         {isModalOpen && (
-          <Modal onClose={handleCloseModal} onSubmit={handleCreateNoteSubmit} />
+          <Modal onClose={handleCloseModal}>
+            <NoteForm
+              onCancel={handleCloseModal}
+              onSubmit={handleCreateNoteSubmit}
+            />
+          </Modal>
         )}
       </main>
     </div>
