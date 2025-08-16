@@ -1,4 +1,4 @@
-import { Formik, Form, Field, ErrorMessage as FormikError } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,12 +9,8 @@ import type { Tag, Note } from "../../types/note";
 export type NoteFormValues = Omit<Note, "id" | "createdAt" | "updatedAt">;
 
 interface NoteFormProps {
-  onCancel?: () => void;
-  onSubmit: (newNoteData: {
-    title: string;
-    content: string;
-    tag: Note["tag"];
-  }) => void;
+  initialValues?: NoteFormValues;
+  onCancel: () => void;
 }
 
 const validationSchema = Yup.object({
@@ -30,15 +26,17 @@ const validationSchema = Yup.object({
     .required("Tag is required"),
 });
 
-export default function NoteForm({ onCancel }: NoteFormProps) {
+export default function NoteForm({
+  initialValues = { title: "", content: "", tag: "Todo" },
+  onCancel,
+}: NoteFormProps) {
   const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: createNote,
+  const mutation = useMutation({
+    mutationFn: (newNote: NoteFormValues) => createNote(newNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note created ✅");
-      onCancel?.();
     },
     onError: () => {
       toast.error("Failed to create note ❌");
@@ -46,12 +44,17 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
   });
 
   return (
-    <Formik<NoteFormValues>
-      initialValues={{ title: "", content: "", tag: "Todo" }}
+    <Formik
+      initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values, { setSubmitting }) => {
-        mutate(values);
-        setSubmitting(false);
+      onSubmit={(values, { setSubmitting, resetForm }) => {
+        mutation.mutate(values, {
+          onSuccess: () => {
+            resetForm();
+            onCancel();
+          },
+          onSettled: () => setSubmitting(false),
+        });
       }}
     >
       {({ isSubmitting }) => (
@@ -59,7 +62,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
             <Field id="title" name="title" type="text" className={css.input} />
-            <FormikError name="title" component="span" className={css.error} />
+            <ErrorMessage name="title" component="span" className={css.error} />
           </div>
 
           <div className={css.formGroup}>
@@ -71,7 +74,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
               rows={8}
               className={css.textarea}
             />
-            <FormikError
+            <ErrorMessage
               name="content"
               component="span"
               className={css.error}
@@ -87,7 +90,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
               <option value="Meeting">Meeting</option>
               <option value="Shopping">Shopping</option>
             </Field>
-            <FormikError name="tag" component="span" className={css.error} />
+            <ErrorMessage name="tag" component="span" className={css.error} />
           </div>
 
           <div className={css.actions}>
@@ -101,9 +104,9 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting || isPending}
+              disabled={isSubmitting || mutation.isPending}
             >
-              {isPending ? "Creating..." : "Create note"}
+              {mutation.isPending ? "Creating..." : "Create note"}
             </button>
           </div>
         </Form>
