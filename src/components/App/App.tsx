@@ -110,10 +110,7 @@ export default function App() {
 
         {isModalOpen && (
           <Modal onClose={handleCloseModal}>
-            <NoteForm
-              onCancel={handleCloseModal}
-              onSubmit={handleCreateNoteSubmit}
-            />
+            <NoteForm onCancel={handleCloseModal} />
           </Modal>
         )}
       </main>
