@@ -52,14 +52,6 @@ export default function App() {
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleCreateNoteSubmit = (newNoteData: {
-    title: string;
-    content: string;
-    tag: Note["tag"];
-  }) => {
-    createNoteMutation.mutate(newNoteData);
-  };
-
   const handleSearch = (value: string) => {
     setSearch(value);
     setCurrentPage(1);
